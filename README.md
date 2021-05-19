@@ -1,5 +1,6 @@
 # BmpImage_ArduinoLib
- Simple Bitmap Library for Arduino
+ Simple Bitmap Library for Arduino.
+ This library may be used for Arduino based boards, but please note that the sample codes are written for Spresense, and I have not checked the library with other Arduino-based board. 
  
 ## Support Format:
    - RGB888 color: 24bit full color
