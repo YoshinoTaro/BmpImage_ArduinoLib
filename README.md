@@ -13,7 +13,7 @@
        // the image pointing imgptr must be true color
        bmp.begin(BmpImage::BMP_IMAGE_RGB888, width, height, imgptr);
        myFile.write(bmp.getBmpBuff(), bmp.getBmpSize());
-       bmp.end();
+       bmp.end(); /* free memory */
    ```
    *RGB565*
    ```
@@ -27,7 +27,7 @@
        // the image pointing imgptr must be 8bit gray scale
        bmp.begin(BmpImage::BMP_IMAGE_GRAY8, width, height, imgptr);
        myFile.write(bmp.getBmpBuff(), bmp.getBmpSize());
-       bmp.end();
+       bmp.end(); /* free memory */
    ```
 
 ## How to read
@@ -44,5 +44,5 @@
      Serial.println("Fail: cannot read : " + String(bmp.getHeight()));
    }
   end:
-    bmp.end();
+    bmp.end(); /* free memory */
  ```
