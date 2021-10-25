@@ -162,11 +162,7 @@ BmpImage::BMP_IMAGE_PIX_FMT BmpImage::begin(File& myFile) {
 
   /* in case of GRAY8 */
   if (m_biBitCount == 8) { 
-    if (m_palette != '\0') freePalette();
-    m_palette = (uint8_t**)malloc(sizeof(uint8_t*)*PALETTE_SIZE_256/4);
-    for (int i = 0; i < PALETTE_SIZE_256/4; ++i) {
-      m_palette[i] = (uint8_t*)malloc(sizeof(uint8_t)*3);
-    }
+    allocPalette();
     for (int i = 0; i < PALETTE_SIZE_256/4; ++i) {
       m_palette[i][0] = myFile.read();
       m_palette[i][1] = myFile.read();
@@ -174,7 +170,7 @@ BmpImage::BMP_IMAGE_PIX_FMT BmpImage::begin(File& myFile) {
       myFile.read(); // dummy read
     }
   }
-
+ 
   if (m_img_buff != '\0') free(m_img_buff);
   m_img_buff = (uint8_t*)malloc(m_biSizeImage);
   if (m_img_buff == '\0') {
@@ -182,15 +178,22 @@ BmpImage::BMP_IMAGE_PIX_FMT BmpImage::begin(File& myFile) {
     return BMP_IMAGE_NONE;
   }
   
-  for (int i = 0; i < m_biSizeImage; ++i) {
-    if (m_biBitCount == 8) {
-      int p = myFile.read();
-      uint8_t r = m_palette[p][0];
-      uint8_t g = m_palette[p][1];
-      uint8_t b = m_palette[p][2];
-      m_img_buff[i] = (uint8_t)(0.299*r + 0.587*g + 0.114*b);
-    } else {
-      m_img_buff[i] = myFile.read();
+  for (int h = m_biHeight-1; h >= 0; --h) {
+    for (int w = 0; w < m_biWidth; ++w) {
+      if (!myFile.available()) {
+        printf("Fatal Error: File Size Mismatch\n");
+        break;
+      }
+      int n = h*m_biWidth + w;
+      if (m_biBitCount == 8) {
+        int p = myFile.read();
+        uint8_t r = m_palette[p][0];
+        uint8_t g = m_palette[p][1];
+        uint8_t b = m_palette[p][2];
+        m_img_buff[n] = (uint8_t)(0.299*r + 0.587*g + 0.114*b);
+      } else {
+        m_img_buff[n] = myFile.read();
+      }
     }
   }
 
@@ -198,7 +201,7 @@ BmpImage::BMP_IMAGE_PIX_FMT BmpImage::begin(File& myFile) {
 }
 
 BmpImage::BMP_IMAGE_PIX_FMT BmpImage::begin(BmpImage::BMP_IMAGE_PIX_FMT fmt
-                              , int width, int height, uint8_t* img) {
+                  , int width, int height, uint8_t* img, bool reverse) {
 
   this->end();
   DEBUG_PRINTF("fmt %d width %d height %d\n",fmt ,width ,height);
@@ -329,7 +332,15 @@ BmpImage::BMP_IMAGE_PIX_FMT BmpImage::begin(BmpImage::BMP_IMAGE_PIX_FMT fmt
   }
 
   /* copy image content to bitmap container */
-  memcpy(m_img_buff, img, m_biSizeImage);
+  if (reverse == false) memcpy(m_img_buff, img, m_biSizeImage);
+  else {
+    int n = 0;
+    for (int y = height - 1; y >= 0; --y, ++n) {
+      for (int x = 0; x < width; ++x) {
+        m_img_buff[width*y + x]  = img[width*n + x];
+      }
+    }
+  }
   return fmt;
 }
 
@@ -539,9 +550,19 @@ uint32_t BmpImage::rswap32(uint8_t word32[4]) {
   return data32;
 }
 
+
+void BmpImage::allocPalette() {
+  if (m_palette != '\0') freePalette();
+  m_palette = (uint8_t**)malloc(sizeof(uint8_t*)*(PALETTE_SIZE_256/4));
+  for (int i = 0; i < PALETTE_SIZE_256/4; ++i) {
+    m_palette[i] = (uint8_t*)malloc(sizeof(uint8_t)*3);
+  }
+}
+
 void BmpImage::freePalette() {
   if (m_palette == '\0') return;
   for (int i = 0; i < PALETTE_SIZE_256/4; ++i) {
+    memset(m_palette[i], '\0', 3);
     free(m_palette[i]);
     m_palette[i] = '\0';
   }

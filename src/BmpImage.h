@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <File.h>
 
-// #define BRD_DEBUG
+//#define BRD_DEBUG
 
 class BmpImage {
 private:
@@ -45,6 +45,7 @@ private:
   uint16_t rswap16(uint8_t word16[2]);
   uint32_t rswap32(uint8_t dword32[4]);
 
+  void allocPalette();
   void freePalette();
 
 
@@ -69,7 +70,7 @@ public:
   BmpImage();
   ~BmpImage();
   BMP_IMAGE_PIX_FMT begin(File& myFile);
-  BMP_IMAGE_PIX_FMT begin(BMP_IMAGE_PIX_FMT fmt ,int width ,int height ,uint8_t* img);
+  BMP_IMAGE_PIX_FMT begin(BMP_IMAGE_PIX_FMT fmt ,int width ,int height ,uint8_t* img, bool reverse=true);
   BMP_IMAGE_PIX_FMT convertPixFormat(BMP_IMAGE_PIX_FMT fmt);
   
   int getBmpSize();
