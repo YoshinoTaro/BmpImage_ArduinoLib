@@ -39,8 +39,9 @@ void CamCB(CamImage img) {
 
     /* make the bmp container and copy the data*/
     bmp.begin(BmpImage::BMP_IMAGE_GRAY8, width, height, gray);
+    bmp.alignImageLine(false);  // "true": convert the image upside down, "false": no convert
     free(gray);
-    
+
     char filename[16] = {};
     sprintf(filename, "gray%03d.bmp", g_counter);
     if (SD.exists(filename)) SD.remove(filename);

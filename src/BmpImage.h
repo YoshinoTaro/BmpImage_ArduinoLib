@@ -8,9 +8,36 @@
 #include <stdlib.h>
 #include <File.h>
 
-//#define BRD_DEBUG
+// #define BRD_DEBUG
 
 class BmpImage {
+public:
+  
+  enum BMP_IMAGE_PIX_FMT {
+    BMP_IMAGE_NONE = 0
+   ,BMP_IMAGE_GRAY8
+   ,BMP_IMAGE_RGB565
+   ,BMP_IMAGE_RGB888
+   // ,BMP_IMAGE_RGB888_ALIGNED
+  };
+
+  BmpImage();
+  ~BmpImage();
+  BMP_IMAGE_PIX_FMT begin(File& myFile);
+  BMP_IMAGE_PIX_FMT begin(BMP_IMAGE_PIX_FMT fmt ,int width ,int height ,uint8_t* img,  bool reverse=true, bool alignment=false);
+  BMP_IMAGE_PIX_FMT convertPixFormat(BMP_IMAGE_PIX_FMT fmt, bool reverse=false);
+  BMP_IMAGE_PIX_FMT alignImageLine(bool reverse=true);
+  
+  int getBmpSize();
+  int getImgSize();
+  uint8_t* getBmpBuff();
+  uint8_t* getImgBuff();
+  int getWidth();
+  int getHeight();
+  BmpImage::BMP_IMAGE_PIX_FMT getPixFormat();
+  bool isAligned();
+  void end();
+
 private:
   const uint16_t m_bfType = 0x4D42;
   uint32_t m_bfSize;
@@ -31,6 +58,8 @@ private:
   uint32_t m_biRmask;
   uint32_t m_biGmask;
   uint32_t m_biBmask; 
+
+  bool m_aligned;
   
   uint8_t* m_bmp_buff;  
   uint8_t* m_img_buff;
@@ -38,6 +67,7 @@ private:
   
   uint8_t  m_word16[2];
   uint8_t  m_word32[4];
+
 
   uint8_t* swap16(uint16_t word16);
   uint8_t* swap32(uint32_t word32);
@@ -47,6 +77,7 @@ private:
 
   void allocPalette();
   void freePalette();
+  void setupBmpHeaderOnMemory(BMP_IMAGE_PIX_FMT fmt);
 
 
   const int HEADER_SIZE = 54;
@@ -58,29 +89,6 @@ private:
   const uint32_t G6_MASK = 0x000007e0;
   const uint32_t B5_MASK = 0x0000001f;
   
-public:
-  
-  enum BMP_IMAGE_PIX_FMT {
-    BMP_IMAGE_NONE = 0
-   ,BMP_IMAGE_GRAY8
-   ,BMP_IMAGE_RGB565
-   ,BMP_IMAGE_RGB888
-  };
-
-  BmpImage();
-  ~BmpImage();
-  BMP_IMAGE_PIX_FMT begin(File& myFile);
-  BMP_IMAGE_PIX_FMT begin(BMP_IMAGE_PIX_FMT fmt ,int width ,int height ,uint8_t* img, bool reverse=true);
-  BMP_IMAGE_PIX_FMT convertPixFormat(BMP_IMAGE_PIX_FMT fmt);
-  
-  int getBmpSize();
-  int getImgSize();
-  uint8_t* getBmpBuff();
-  uint8_t* getImgBuff();
-  int getWidth();
-  int getHeight();
-  BmpImage::BMP_IMAGE_PIX_FMT getPixFormat();
-  void end();
 };
 
 

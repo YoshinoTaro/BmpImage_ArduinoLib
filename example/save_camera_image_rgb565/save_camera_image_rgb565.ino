@@ -34,6 +34,7 @@ void CamCB(CamImage img) {
     small.convertPixFormat(CAM_IMAGE_PIX_FMT_RGB565);
 
     bmp.begin(BmpImage::BMP_IMAGE_RGB565, width, height, small.getImgBuff());
+    bmp.alignImageLine(false);  // "true": convert the image upside down, "false": no convert
 
     char filename[16] = {};
     sprintf(filename, "rgb16%03d.bmp", g_counter);

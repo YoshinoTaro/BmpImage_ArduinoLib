@@ -14,7 +14,9 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 SDClass SD;
 BmpImage bmp;
 
-const char BMPFILE[] = "test.bmp";
+// const char BMPFILE[] = "GRAY8.bmp";
+// const char BMPFILE[] = "RGB565.bmp";
+const char BMPFILE[] = "RGB888.bmp";
 const char format[3][8] = {"GRAY", "RGB565", "RGB888" };
 
 void setup() {

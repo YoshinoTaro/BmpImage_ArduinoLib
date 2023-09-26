@@ -37,6 +37,7 @@ void CamCB(CamImage img) {
     bmp.begin(BmpImage::BMP_IMAGE_RGB565, width, height, small.getImgBuff());
     /* 3. convert the rgb565 image to the rgb888 image */
     bmp.convertPixFormat(BmpImage::BMP_IMAGE_RGB888);
+    bmp.alignImageLine(false);  // "true": convert the image upside down, "false": no convert
 
     char filename[16] = {};
     sprintf(filename, "rgb24%03d.bmp", g_counter);

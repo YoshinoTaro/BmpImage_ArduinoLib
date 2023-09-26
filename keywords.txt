@@ -3,7 +3,8 @@ BmpImage	KEYWORD1
 
 # Function
 begin	KEYWORD2
-convertPixFormat	KEYWORD2 
+convertPixFormat	KEYWORD2
+alignImageLine	KEYWORD2 
 getBmpSize	KEYWORD2
 getImgSize	KEYWORD2
 getBmpBuff	KEYWORD2
@@ -11,6 +12,7 @@ getImgBuff	KEYWORD2
 getWidth	KEYWORD2
 getHeight	KEYWORD2
 getPixFormat	KEYWORD2
+isAligned	KEYWORD2	
 end	KEYWORD2
 
 BMP_IMAGE_RGB565	KEYWORD2
