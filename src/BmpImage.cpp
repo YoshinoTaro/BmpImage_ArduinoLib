@@ -348,6 +348,7 @@ BmpImage::BMP_IMAGE_PIX_FMT BmpImage::convertPixFormat(BmpImage::BMP_IMAGE_PIX_F
   uint8_t*  tmp_grayBuff;  
   BMP_IMAGE_PIX_FMT pre_fmt = (BMP_IMAGE_PIX_FMT)(m_biBitCount/8);
   DEBUG_PRINTF("From FMT %d to FMT %d\n", pre_fmt, fmt);
+  DEBUG_PRINTF("Width: %ld Height: %ld\n", m_biWidth, m_biHeight);
   if (fmt == pre_fmt || fmt == BMP_IMAGE_NONE) return fmt;
 
   /** to RGB888 from RGB565 or GRAY8 or RGB888 **/
@@ -361,13 +362,17 @@ BmpImage::BMP_IMAGE_PIX_FMT BmpImage::convertPixFormat(BmpImage::BMP_IMAGE_PIX_F
 
     /* from RGB888 */
     if (pre_fmt == BMP_IMAGE_RGB888) {
-      memcpy(tmp_rgbBuff, m_img_buff, m_biWidth*m_biHeight*3);
+      DEBUG_PRINTF("From RGB888 to RGB888\n");
+      free(tmp_rgbBuff);
+      tmp_rgbBuff = NULL;
+      return BMP_IMAGE_RGB888;
     }
     /* from RGB565 */
     else if (pre_fmt == BMP_IMAGE_RGB565) {
+      DEBUG_PRINTF("From RGB565 to RGB888\n");
       uint16_t* rgb565 = (uint16_t*)m_img_buff;
       int n = 0;
-      for (uint16_t i = 0; i < m_biWidth*m_biHeight; ++i) {
+      for (uint32_t i = 0; i < m_biWidth*m_biHeight; ++i) {
         uint8_t r = (uint8_t)((rgb565[i] & R5_MASK) >> 8);
         uint8_t g = (uint8_t)((rgb565[i] & G6_MASK) >> 3);
         uint8_t b = (uint8_t)((rgb565[i] & B5_MASK) << 3);
@@ -378,14 +383,16 @@ BmpImage::BMP_IMAGE_PIX_FMT BmpImage::convertPixFormat(BmpImage::BMP_IMAGE_PIX_F
     }
     /* from GRAY8 */
     else if (pre_fmt == BMP_IMAGE_GRAY8) {
+      DEBUG_PRINTF("From GRAY8 to RGB888\n");
       uint8_t* gray8 = (uint8_t*)m_img_buff;
       int n = 0;
-      for (uint16_t i = 0; i < m_biWidth*m_biHeight; ++i) {
+      for (uint32_t i = 0; i < m_biWidth*m_biHeight; ++i) {
         tmp_rgbBuff[n++] = gray8[i];
         tmp_rgbBuff[n++] = gray8[i];
         tmp_rgbBuff[n++] = gray8[i];
       }      
     }
+    this->end();
     this->begin(fmt, m_biWidth, m_biHeight, tmp_rgbBuff, reverse);
     free(tmp_rgbBuff);
     tmp_rgbBuff = NULL;
@@ -399,11 +406,19 @@ BmpImage::BMP_IMAGE_PIX_FMT BmpImage::convertPixFormat(BmpImage::BMP_IMAGE_PIX_F
       this->end();
       return BMP_IMAGE_NONE;
     }
+    /* from RGB565 */
+    if (pre_fmt == BMP_IMAGE_RGB565) {
+      DEBUG_PRINTF("From RGB565 to RGB565\n");
+      free(tmp_rgb565Buff);
+      tmp_rgb565Buff = NULL;
+      return BMP_IMAGE_RGB565;
+    }
     /* from RGB888 */
     if (pre_fmt == BMP_IMAGE_RGB888) { 
+      DEBUG_PRINTF("From RGB888 to RGB565\n");
       uint8_t* rgb888 = (uint8_t*)m_img_buff;
       int n = 0;
-      for (uint16_t i = 0; i < m_biHeight*m_biWidth; ++i) {
+      for (uint32_t i = 0; i < m_biHeight*m_biWidth; ++i) {
         uint16_t b = ((uint16_t)(rgb888[n++]) >> 3) & B5_MASK;
         uint16_t g = ((uint16_t)(rgb888[n++]) << 3) & G6_MASK;
         uint16_t r = ((uint16_t)(rgb888[n++]) << 8) & R5_MASK;
@@ -412,14 +427,16 @@ BmpImage::BMP_IMAGE_PIX_FMT BmpImage::convertPixFormat(BmpImage::BMP_IMAGE_PIX_F
     }
     /* from GRAY8 */
     else if (pre_fmt == BMP_IMAGE_GRAY8) {
+      DEBUG_PRINTF("From GRAY8 to RGB565\n");
       uint8_t* gray8 = (uint8_t*)m_img_buff;
-      for (uint16_t i = 0; i < m_biWidth*m_biHeight; ++i) {
+      for (uint32_t i = 0; i < m_biWidth*m_biHeight; ++i) {
         uint16_t b = ((uint16_t)(gray8[i]) >> 3) & B5_MASK; 
         uint16_t g = ((uint16_t)(gray8[i]) << 3) & G6_MASK; 
         uint16_t r = ((uint16_t)(gray8[i]) << 8) & R5_MASK;   
         tmp_rgb565Buff[i] = r | g | b;
       }      
     }
+    this->end();
     this->begin(fmt, m_biWidth, m_biHeight, (uint8_t*)tmp_rgb565Buff, reverse);
     free(tmp_rgb565Buff);
     tmp_rgb565Buff = NULL;
@@ -433,11 +450,19 @@ BmpImage::BMP_IMAGE_PIX_FMT BmpImage::convertPixFormat(BmpImage::BMP_IMAGE_PIX_F
       this->end();
       return BMP_IMAGE_NONE;
     }
+    /* from GRAY8 */
+    if (pre_fmt == BMP_IMAGE_GRAY8) {
+      DEBUG_PRINTF("From GRAY8 to GRAY8\n");
+      free(tmp_grayBuff);
+      tmp_grayBuff = NULL;
+      return BMP_IMAGE_GRAY8;
+    }
     /* from RGB888 */
     if (pre_fmt == BMP_IMAGE_RGB888) { 
+      DEBUG_PRINTF("From RGB888 to GRAY8\n");
       uint8_t* rgb888 = (uint8_t*)m_img_buff;
       int n = 0;
-      for (uint16_t i = 0; i < m_biWidth*m_biHeight; ++i) {
+      for (uint32_t i = 0; i < m_biWidth*m_biHeight; ++i) {
         float r = rgb888[n++];
         float g = rgb888[n++];
         float b = rgb888[n++];
@@ -447,8 +472,9 @@ BmpImage::BMP_IMAGE_PIX_FMT BmpImage::convertPixFormat(BmpImage::BMP_IMAGE_PIX_F
     }
     /* from RGB565 */
     else if (pre_fmt == BMP_IMAGE_RGB565) {
+      DEBUG_PRINTF("From RGB565 to GRAY8\n");
       uint16_t* rgb565 = (uint16_t*)m_img_buff;
-      for (uint16_t i = 0; i < m_biWidth*m_biHeight; ++i) {
+      for (uint32_t i = 0; i < m_biWidth*m_biHeight; ++i) {
         float r = (float)((rgb565[i] & R5_MASK) >> 8); 
         float g = (float)((rgb565[i] & G6_MASK) >> 3); 
         float b = (float)((rgb565[i] & B5_MASK) << 3);   
@@ -456,6 +482,7 @@ BmpImage::BMP_IMAGE_PIX_FMT BmpImage::convertPixFormat(BmpImage::BMP_IMAGE_PIX_F
         tmp_grayBuff[i] = (uint8_t)gray;
       }      
     }
+    this->end();
     this->begin(fmt, m_biWidth, m_biHeight, tmp_grayBuff, reverse);
     free(tmp_grayBuff);
     tmp_grayBuff = NULL;
